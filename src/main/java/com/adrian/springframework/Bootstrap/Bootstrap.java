@@ -2,20 +2,24 @@ package com.adrian.springframework.Bootstrap;
 
 import com.adrian.springframework.domain.Category;
 import com.adrian.springframework.domain.Customer;
+import com.adrian.springframework.domain.Vendor;
 import com.adrian.springframework.repos.CategoryRepository;
 import com.adrian.springframework.repos.CustomerRepository;
+import com.adrian.springframework.repos.VendorRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 @Component
 public class Bootstrap implements CommandLineRunner {
 
-    private CategoryRepository categoryRepository;
-    private CustomerRepository customerRepository;
+    private final CategoryRepository categoryRepository;
+    private final CustomerRepository customerRepository;
+    private final VendorRepository vendorRepository;
 
-    public Bootstrap(CategoryRepository categoryRepository, CustomerRepository customerRepository) {
+    public Bootstrap(CategoryRepository categoryRepository, CustomerRepository customerRepository, VendorRepository vendorRepository) {
         this.categoryRepository = categoryRepository;
         this.customerRepository = customerRepository;
+        this.vendorRepository = vendorRepository;
     }
 
     @Override
@@ -25,6 +29,19 @@ public class Bootstrap implements CommandLineRunner {
 
         loadCategories();
 
+        loadVendors();
+
+    }
+
+    private void loadVendors(){
+
+        Vendor vendor1 = new Vendor();
+        vendor1.setName("Vendors nr 1");
+        vendorRepository.save(vendor1);
+
+        Vendor vendor2 = new Vendor();
+        vendor2.setName("Vendors nr 2");
+        vendorRepository.save(vendor2);
     }
 
     private void loadCustomers() {
