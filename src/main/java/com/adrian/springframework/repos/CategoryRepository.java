@@ -1,9 +1,10 @@
 package com.adrian.springframework.repos;
 
 import com.adrian.springframework.domain.Category;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
+import reactor.core.publisher.Mono;
 
-public interface CategoryRepository extends JpaRepository<Category, Long> {
+public interface CategoryRepository extends ReactiveMongoRepository<Category, String> {
 
-    Category findByName(String name);
+    Mono<Category> findByName(String name);
 }

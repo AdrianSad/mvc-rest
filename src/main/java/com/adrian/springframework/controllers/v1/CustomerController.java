@@ -1,8 +1,8 @@
 package com.adrian.springframework.controllers.v1;
 
-import com.adrian.springframework.api.v1.model.CustomerDTO;
-import com.adrian.springframework.api.v1.model.CustomerListDTO;
+
 import com.adrian.springframework.config.SwaggerConfig;
+import com.adrian.springframework.domain.Customer;
 import com.adrian.springframework.services.CustomerService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Api(tags = {SwaggerConfig.CUSTOMER_CONTROLLER_TAG})
 @RestController
@@ -25,43 +27,38 @@ public class CustomerController {
     @ApiOperation(value = "This will get a list of customers.", notes = "Some notes")
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public CustomerListDTO getListOfCustomers(){
-
-        return new CustomerListDTO(customerService.getAllCustomers());
+    public Flux<Customer> getListOfCustomers(){
+        return customerService.getAllCustomers();
     }
 
     @GetMapping("{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public CustomerDTO getCustomerById(@PathVariable Long id){
-
+    public Mono<ResponseEntity<Customer>> getCustomerById(@PathVariable String id){
         return customerService.getCustomerById(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CustomerDTO createNewCustomer(@RequestBody CustomerDTO customerDTO){
-
-        return customerService.createNewCustomer(customerDTO);
+    public Mono<Customer> createNewCustomer(@RequestBody Customer customer){
+        return customerService.createNewCustomer(customer);
     }
 
     @PutMapping("{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public CustomerDTO updateNewCustomer(@PathVariable Long id, @RequestBody CustomerDTO customerDTO){
-
-        return customerService.saveCustomerByDTO(id, customerDTO);
+    public Mono<ResponseEntity<Customer>> updateNewCustomer(@PathVariable String id, @RequestBody Customer customer){
+        return customerService.updateCustomer(id, customer);
     }
 
     @PatchMapping("{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public CustomerDTO patchCustomer(@PathVariable Long id, @RequestBody CustomerDTO customerDTO){
-
-        return customerService.patchCustomer(id, customerDTO);
+    public Mono<ResponseEntity<Customer>> patchCustomer(@PathVariable String id, @RequestBody Customer customer){
+        return customerService.patchCustomer(id, customer);
     }
 
     @DeleteMapping("{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public void deleteCustomer(@PathVariable Long id){
-
-        customerService.deleteCustomerById(id);
+    public Mono<ResponseEntity<Void>> deleteCustomer(@PathVariable String id){
+        return customerService.deleteCustomerById(id);
     }
+
+//    @ExceptionHandler
+//    public ResponseEntity handleNotFoundException(TweetNotFoundException ex) {
+//        return ResponseEntity.notFound().build();
+//    }
 }

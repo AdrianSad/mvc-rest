@@ -36,27 +36,29 @@ public class Bootstrap implements CommandLineRunner {
     private void loadVendors(){
 
         Vendor vendor1 = new Vendor();
+        vendor1.setId("1");
         vendor1.setName("Vendors nr 1");
-        vendorRepository.save(vendor1);
+        vendorRepository.save(vendor1).block();
 
         Vendor vendor2 = new Vendor();
+        vendor2.setId("2");
         vendor2.setName("Vendors nr 2");
-        vendorRepository.save(vendor2);
+        vendorRepository.save(vendor2).block();
     }
 
     private void loadCustomers() {
 
         Customer customer1 = new Customer();
-        customer1.setId(1L);
+        customer1.setId("1");
         customer1.setFirstName("Adrian");
         customer1.setLastName("Malolepszy");
-        customerRepository.save(customer1);
+        customerRepository.save(customer1).block();
 
         Customer customer2 = new Customer();
-        customer2.setId(2L);
+        customer2.setId("2");
         customer2.setFirstName("Ola");
         customer2.setLastName("Lepsza");
-        customerRepository.save(customer2);
+        customerRepository.save(customer2).block();
     }
 
     private void loadCategories() {
@@ -75,10 +77,10 @@ public class Bootstrap implements CommandLineRunner {
         Category nuts = new Category();
         nuts.setName("Nuts");
 
-        categoryRepository.save(fruits);
-        categoryRepository.save(nuts);
-        categoryRepository.save(dried);
-        categoryRepository.save(fresh);
-        categoryRepository.save(nuts);
+        categoryRepository.save(fruits).block();
+        categoryRepository.save(nuts).block();
+        categoryRepository.save(dried).block();
+        categoryRepository.save(fresh).block();
+        categoryRepository.save(nuts).block();
     }
 }

@@ -1,21 +1,23 @@
 package com.adrian.springframework.services;
 
-import com.adrian.springframework.api.v1.model.VendorDTO;
-import com.adrian.springframework.api.v1.model.VendorListDTO;
+import com.adrian.springframework.domain.Vendor;
+import org.springframework.http.ResponseEntity;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
 public interface VendorService {
 
-    VendorDTO getVendorById(Long id);
+    Mono<ResponseEntity<Vendor>> getVendorById(String id);
 
-    VendorListDTO getAllVendors();
+    Flux<Vendor> getAllVendors();
 
-    VendorDTO createNewVendor(VendorDTO vendorDTO);
+    Mono<Vendor> createNewVendor(Vendor vendor);
 
-    VendorDTO saveVendorByDTO(Long id, VendorDTO vendorDTO);
+    Mono<ResponseEntity<Vendor>> updateVendor(String id, Vendor vendor);
 
-    VendorDTO patchVendor(Long id, VendorDTO vendorDTO);
+    Mono<ResponseEntity<Vendor>> patchVendor(String id, Vendor vendor);
 
-    void deleteVendorById(Long id);
+    Mono<ResponseEntity<Void>> deleteVendorById(String id);
 }

@@ -1,11 +1,12 @@
 package com.adrian.springframework.services;
 
-import com.adrian.springframework.api.v1.mapper.VendorMapper;
-import com.adrian.springframework.api.v1.model.VendorDTO;
-import com.adrian.springframework.api.v1.model.VendorListDTO;
 import com.adrian.springframework.domain.Vendor;
 import com.adrian.springframework.repos.VendorRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,88 +14,61 @@ import java.util.stream.Collectors;
 @Service
 public class VendorServiceImpl implements VendorService {
 
-    private final VendorMapper vendorMapper;
     private final VendorRepository vendorRepository;
 
-    public VendorServiceImpl(VendorMapper vendorMapper, VendorRepository vendorRepository) {
-        this.vendorMapper = vendorMapper;
+    public VendorServiceImpl(VendorRepository vendorRepository) {
         this.vendorRepository = vendorRepository;
     }
 
-    @Override
-    public VendorDTO getVendorById(Long id) {
 
+    @Override
+    public Mono<ResponseEntity<Vendor>> getVendorById(String id) {
         return vendorRepository.findById(id)
-                .map(vendorMapper::vendorToVendorDTO)
-                .map(vendorDTO -> {
-                    vendorDTO.setVendorURL(getVendorUrl(id));
-                    return vendorDTO;
-                })
-                .orElseThrow(ResourceNotFoundException::new);
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @Override
-    public VendorListDTO getAllVendors() {
-
-        List<VendorDTO> vendorDTOS = vendorRepository
-                .findAll()
-                .stream()
-                .map(vendor -> {
-                    VendorDTO vendorDTO = vendorMapper.vendorToVendorDTO(vendor);
-                    vendorDTO.setVendorURL(getVendorUrl(vendor.getId()));
-                    return vendorDTO;
-                })
-                .collect(Collectors.toList());
-
-        return new VendorListDTO(vendorDTOS);
+    public Flux<Vendor> getAllVendors() {
+        return vendorRepository.findAll();
     }
 
     @Override
-    public VendorDTO createNewVendor(VendorDTO vendorDTO) {
-        return saveAndReturnDTO(vendorMapper.vendorDTOToVendor(vendorDTO));
+    public Mono<Vendor> createNewVendor(Vendor vendor) {
+        return vendorRepository.save(vendor);
     }
 
     @Override
-    public VendorDTO saveVendorByDTO(Long id, VendorDTO vendorDTO) {
-
-        Vendor vendorToSave = vendorMapper.vendorDTOToVendor(vendorDTO);
-        vendorToSave.setId(id);
-
-        return saveAndReturnDTO(vendorToSave);
-    }
-
-    @Override
-    public VendorDTO patchVendor(Long id, VendorDTO vendorDTO) {
-
+    public Mono<ResponseEntity<Vendor>> updateVendor(String id, Vendor vendor) {
         return vendorRepository.findById(id)
-                .map(vendor -> {
+                .flatMap(foundVendor -> {
+                    foundVendor.setName(vendor.getName());
+                    return vendorRepository.save(foundVendor);
+                })
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 
-                    if(vendorDTO.getName() != null){
-                        vendor.setName(vendorDTO.getName());
-                    }
-
-                    return saveAndReturnDTO(vendor);
-                }).orElseThrow(ResourceNotFoundException::new);
     }
 
     @Override
-    public void deleteVendorById(Long id) {
+    public Mono<ResponseEntity<Vendor>> patchVendor(String id, Vendor vendor) {
+        return vendorRepository.findById(id)
+                .flatMap(foundVendor -> {
 
-        vendorRepository.deleteById(id);
+                    if(foundVendor.getName() != null)
+                        foundVendor.setName(vendor.getName());
+
+                    return vendorRepository.save(foundVendor);
+                })
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    private String getVendorUrl(Long id){
-        return "/api/v1/vendors/" + id;
-    }
-
-    private VendorDTO saveAndReturnDTO(Vendor vendor){
-
-        Vendor savedVendor = vendorRepository.save(vendor);
-
-        VendorDTO returnVendor = vendorMapper.vendorToVendorDTO(savedVendor);
-
-        returnVendor.setVendorURL(getVendorUrl(savedVendor.getId()));
-
-        return  returnVendor;
+    @Override
+    public Mono<ResponseEntity<Void>> deleteVendorById(String id) {
+        return vendorRepository.findById(id)
+                .flatMap(foundVendor -> vendorRepository.delete(foundVendor)
+                        .then(Mono.just(new ResponseEntity<Void>(HttpStatus.OK)))
+                ).defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 }
