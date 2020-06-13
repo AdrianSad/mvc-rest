@@ -2,6 +2,7 @@ package com.adrian.springframework.controllers.v1;
 
 import com.adrian.springframework.config.SwaggerConfig;
 import com.adrian.springframework.domain.Category;
+import com.adrian.springframework.exceptions.NotFoundException;
 import com.adrian.springframework.services.CategoryService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -37,5 +38,10 @@ public class CategoryController {
     @GetMapping("{name}")
     public Mono<ResponseEntity<Category>> getCategoryByName(@PathVariable @ApiParam(value = "Name of category to return ") String name){
         return categoryService.getCategoryByName(name);
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity handleTweetNotFoundException(NotFoundException ex) {
+        return ResponseEntity.notFound().build();
     }
 }

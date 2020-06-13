@@ -6,9 +6,12 @@ import com.adrian.springframework.domain.Vendor;
 import com.adrian.springframework.repos.CategoryRepository;
 import com.adrian.springframework.repos.CustomerRepository;
 import com.adrian.springframework.repos.VendorRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 
+@Slf4j
 @Component
 public class Bootstrap implements CommandLineRunner {
 
@@ -35,52 +38,39 @@ public class Bootstrap implements CommandLineRunner {
 
     private void loadVendors(){
 
-        Vendor vendor1 = new Vendor();
-        vendor1.setId("1");
-        vendor1.setName("Vendors nr 1");
-        vendorRepository.save(vendor1).block();
-
-        Vendor vendor2 = new Vendor();
-        vendor2.setId("2");
-        vendor2.setName("Vendors nr 2");
-        vendorRepository.save(vendor2).block();
+        vendorRepository.deleteAll()
+                .thenMany(
+                        Flux.just(
+                                Vendor.builder().id("1").name("Fast-Food Bus").build(),
+                                Vendor.builder().id("2").name("Health-Food Stall").build()
+                        ).flatMap(vendorRepository::save))
+                .thenMany(vendorRepository.findAll())
+                .subscribe(cust -> log.info("Vendor created:\n" + cust.toString()));
     }
 
     private void loadCustomers() {
 
-        Customer customer1 = new Customer();
-        customer1.setId("1");
-        customer1.setFirstName("Adrian");
-        customer1.setLastName("Malolepszy");
-        customerRepository.save(customer1).block();
-
-        Customer customer2 = new Customer();
-        customer2.setId("2");
-        customer2.setFirstName("Ola");
-        customer2.setLastName("Lepsza");
-        customerRepository.save(customer2).block();
+        customerRepository.deleteAll()
+                .thenMany(
+                        Flux.just(
+                                Customer.builder().id("1").firstName("Jan").lastName("Kowalski").age(18).build(),
+                                Customer.builder().id("2").lastName("Adrian").lastName("Sadurski").age(20).build()
+                        ).flatMap(customerRepository::save))
+                .thenMany(customerRepository.findAll())
+                .subscribe(cust -> log.info("Customer created:\n" + cust.toString()));
     }
 
     private void loadCategories() {
-        Category fruits = new Category();
-        fruits.setName("Fruits");
 
-        Category dried = new Category();
-        dried.setName("Dried");
-
-        Category fresh = new Category();
-        fresh.setName("Fresh");
-
-        Category exotic = new Category();
-        exotic.setName("Exotic");
-
-        Category nuts = new Category();
-        nuts.setName("Nuts");
-
-        categoryRepository.save(fruits).block();
-        categoryRepository.save(nuts).block();
-        categoryRepository.save(dried).block();
-        categoryRepository.save(fresh).block();
-        categoryRepository.save(nuts).block();
+        categoryRepository.deleteAll()
+                .thenMany(
+                        Flux.just(
+                                Category.builder().name("Fruits").build(),
+                                Category.builder().name("Vegetables").build(),
+                                Category.builder().name("Fresh").build(),
+                                Category.builder().name("Meat").build()
+                        ).flatMap(categoryRepository::save))
+                .thenMany(categoryRepository.findAll())
+                .subscribe(cat -> log.info("Category created:\n" + cat.toString()));
     }
 }
