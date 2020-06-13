@@ -1,10 +1,12 @@
 package com.adrian.springframework.services;
 
-import com.adrian.springframework.api.v1.mapper.CustomerMapper;
-import com.adrian.springframework.api.v1.model.CustomerDTO;
 import com.adrian.springframework.domain.Customer;
 import com.adrian.springframework.repos.CustomerRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,88 +15,64 @@ import java.util.stream.Collectors;
 public class CustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository customerRepository;
-    private final CustomerMapper customerMapper;
 
-    public CustomerServiceImpl(CustomerRepository customerRepository, CustomerMapper customerMapper) {
+    public CustomerServiceImpl(CustomerRepository customerRepository) {
         this.customerRepository = customerRepository;
-        this.customerMapper = customerMapper;
+    }
+
+
+    @Override
+    public Flux<Customer> getAllCustomers() {
+        return customerRepository.findAll();
     }
 
     @Override
-    public List<CustomerDTO> getAllCustomers() {
-
-        return customerRepository
-                .findAll()
-                .stream()
-                .map(customer -> {
-                    CustomerDTO customerDTO = customerMapper.customerToCustomerDTO(customer);
-                    customerDTO.setCustomerURL("/api/v1/customer/" + customer.getId());
-                    return customerDTO;
-                })
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public CustomerDTO getCustomerById(Long id) {
-
+    public Mono<ResponseEntity<Customer>> getCustomerById(String id) {
         return customerRepository.findById(id)
-                .map(customerMapper::customerToCustomerDTO)
-                .orElseThrow(ResourceNotFoundException::new);
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @Override
-    public CustomerDTO createNewCustomer(CustomerDTO customerDTO) {
-
-        Customer customer = customerMapper.customerDTOToCustomer(customerDTO);
-
-        return saveAndReturnDTO(customer);
-    }
-
-    private CustomerDTO saveAndReturnDTO(Customer customer) {
-        Customer savedCustomer = customerRepository.save(customer);
-
-        CustomerDTO returnDTO = customerMapper.customerToCustomerDTO(savedCustomer);
-
-        returnDTO.setCustomerURL("/api/v1/customer/" + savedCustomer.getId());
-
-        return returnDTO;
+    public Mono<Customer> createNewCustomer(Customer customer) {
+        return customerRepository.save(customer);
     }
 
     @Override
-    public CustomerDTO saveCustomerByDTO(Long id, CustomerDTO customerDTO) {
+    public Mono<ResponseEntity<Customer>> updateCustomer(String id, Customer customer) {
+        return customerRepository.findById(id)
+                .flatMap(foundCustomer -> {
+                    foundCustomer.setFirstName(customer.getFirstName());
+                    foundCustomer.setLastName(customer.getLastName());
+                    return customerRepository.save(foundCustomer);
+                })
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 
-        Customer customer = customerMapper.customerDTOToCustomer(customerDTO);
-        customer.setId(id);
-
-        return saveAndReturnDTO(customer);
     }
 
     @Override
-    public CustomerDTO patchCustomer(Long id, CustomerDTO customerDTO) {
-        return customerRepository.findById(id).map(customer -> {
+    public Mono<ResponseEntity<Customer>> patchCustomer(String id, Customer customer) {
+        return customerRepository.findById(id)
+                .flatMap(foundCustomer -> {
 
-            if(customerDTO.getFirstName() != null){
-                customer.setFirstName(customerDTO.getFirstName());
-            }
+                    if(foundCustomer.getFirstName() != null)
+                        foundCustomer.setFirstName(customer.getFirstName());
 
-            if(customerDTO.getLastName() != null){
-                customer.setLastName(customerDTO.getLastName());
-            }
+                    if(foundCustomer.getLastName() != null)
+                        foundCustomer.setLastName(customer.getLastName());
 
-            CustomerDTO returnDTO = customerMapper.customerToCustomerDTO(customerRepository.save(customer));
-
-            returnDTO.setCustomerURL("/api/v1/customer/" + id);
-
-            return  returnDTO;
-
-        }).orElseThrow(ResourceNotFoundException::new);
+                    return customerRepository.save(foundCustomer);
+                })
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @Override
-    public void deleteCustomerById(Long id) {
-
-        customerRepository.deleteById(id);
+    public Mono<ResponseEntity<Void>> deleteCustomerById(String id) {
+        return customerRepository.findById(id)
+                .flatMap(foundCustomer -> customerRepository.delete(foundCustomer)
+                        .then(Mono.just(new ResponseEntity<Void>(HttpStatus.OK)))
+                ).defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
-
-
 }

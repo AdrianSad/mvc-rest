@@ -1,21 +1,23 @@
 package com.adrian.springframework.services;
 
-import com.adrian.springframework.api.v1.model.CustomerDTO;
 import com.adrian.springframework.domain.Customer;
+import org.springframework.http.ResponseEntity;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
 public interface CustomerService {
 
-    List<CustomerDTO> getAllCustomers();
+    Flux<Customer> getAllCustomers();
 
-    CustomerDTO getCustomerById(Long id);
+    Mono<ResponseEntity<Customer>> getCustomerById(String id);
 
-    CustomerDTO createNewCustomer(CustomerDTO customerDTO);
+    Mono<Customer> createNewCustomer(Customer customer);
 
-    CustomerDTO saveCustomerByDTO(Long id, CustomerDTO customerDTO);
+    Mono<ResponseEntity<Customer>> updateCustomer(String id, Customer customer);
 
-    CustomerDTO patchCustomer(Long id, CustomerDTO customerDTO);
+    Mono<ResponseEntity<Customer>> patchCustomer(String id, Customer customer);
 
-    void deleteCustomerById(Long id);
+    Mono<ResponseEntity<Void>> deleteCustomerById(String id);
 }

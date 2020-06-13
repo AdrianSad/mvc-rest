@@ -1,12 +1,15 @@
 package com.adrian.springframework.services;
 
-import com.adrian.springframework.api.v1.model.CategoryDTO;
+import com.adrian.springframework.domain.Category;
+import org.springframework.http.ResponseEntity;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
 public interface CategoryService {
 
-    List<CategoryDTO> getAllCategories();
+    Flux<Category> getAllCategories();
 
-    CategoryDTO getCategoryByName(String name);
+    Mono<ResponseEntity<Category>> getCategoryByName(String name);
 }
