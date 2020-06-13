@@ -6,6 +6,7 @@ import com.adrian.springframework.domain.Customer;
 import com.adrian.springframework.services.CustomerService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -24,36 +25,41 @@ public class CustomerController {
         this.customerService = customerService;
     }
 
-    @ApiOperation(value = "This will get a list of customers.", notes = "Some notes")
+    @ApiOperation(value = "List of customers", notes = "This will get a list of customers.")
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public Flux<Customer> getListOfCustomers(){
         return customerService.getAllCustomers();
     }
 
+    @ApiOperation(value = "Get customer by id", notes = "Returns a single customer if exists.")
     @GetMapping("{id}")
-    public Mono<ResponseEntity<Customer>> getCustomerById(@PathVariable String id){
+    public Mono<ResponseEntity<Customer>> getCustomerById(@PathVariable @ApiParam(value = "ID of customer to return") String id){
         return customerService.getCustomerById(id);
     }
 
+    @ApiOperation(value = "Create customer")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<Customer> createNewCustomer(@RequestBody Customer customer){
+    public Mono<Customer> createNewCustomer(@RequestBody @ApiParam(value = "Required customer object to create") Customer customer){
         return customerService.createNewCustomer(customer);
     }
 
+    @ApiOperation(value = "Update a existing customer")
     @PutMapping("{id}")
-    public Mono<ResponseEntity<Customer>> updateNewCustomer(@PathVariable String id, @RequestBody Customer customer){
+    public Mono<ResponseEntity<Customer>> updateNewCustomer(@PathVariable @ApiParam(value = "ID of customer to update") String id, @RequestBody @ApiParam(value = "Required customer object to update") Customer customer){
         return customerService.updateCustomer(id, customer);
     }
 
+    @ApiOperation(value = "Update customer's data")
     @PatchMapping("{id}")
-    public Mono<ResponseEntity<Customer>> patchCustomer(@PathVariable String id, @RequestBody Customer customer){
+    public Mono<ResponseEntity<Customer>> patchCustomer(@PathVariable @ApiParam(value = "ID of customer to update") String id, @RequestBody @ApiParam(value = "Required customer object to updatee") Customer customer){
         return customerService.patchCustomer(id, customer);
     }
 
+    @ApiOperation(value = "Delete existing customer")
     @DeleteMapping("{id}")
-    public Mono<ResponseEntity<Void>> deleteCustomer(@PathVariable String id){
+    public Mono<ResponseEntity<Void>> deleteCustomer(@PathVariable @ApiParam(value = "ID of customer to delete") String id){
         return customerService.deleteCustomerById(id);
     }
 
