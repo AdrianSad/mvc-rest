@@ -1,4 +1,4 @@
-# WebFlux rest
+# WebFlux rest [![CircleCI](https://circleci.com/gh/AdrianSad/webflux-rest.svg?style=svg&circle-token=a7844edd188772b5c0e92eca8254cd4602142587)](<LINK>)
 
 Reactive RESTful shop application.
 
