@@ -23,4 +23,8 @@ public class Vendor {
     @NotNull(message = "Vendor name cannot be empty")
     @NotEmpty
     private String name;
+
+    private String city;
+
+    private String address;
 }

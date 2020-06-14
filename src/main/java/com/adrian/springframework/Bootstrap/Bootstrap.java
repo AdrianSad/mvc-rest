@@ -41,8 +41,8 @@ public class Bootstrap implements CommandLineRunner {
         vendorRepository.deleteAll()
                 .thenMany(
                         Flux.just(
-                                Vendor.builder().id("1").name("Fast-Food Bus").build(),
-                                Vendor.builder().id("2").name("Health-Food Stall").build()
+                                Vendor.builder().id("1").name("Fast-Food Bus").city("Wroclaw").address("ul. Edwarda Wittiga 123").build(),
+                                Vendor.builder().id("2").name("Health-Food Stall").city("Warszawa").address("ul. Wiejska 1").build()
                         ).flatMap(vendorRepository::save))
                 .thenMany(vendorRepository.findAll())
                 .subscribe(cust -> log.info("Vendor created:\n" + cust.toString()));

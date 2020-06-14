@@ -58,6 +58,12 @@ public class VendorServiceImpl implements VendorService {
                     if(foundVendor.getName() != null)
                         foundVendor.setName(vendor.getName());
 
+                    if(foundVendor.getCity() != null)
+                        foundVendor.setCity(vendor.getCity());
+
+                    if(foundVendor.getAddress() != null)
+                        foundVendor.setAddress(vendor.getAddress());
+
                     return vendorRepository.save(foundVendor);
                 })
                 .map(ResponseEntity::ok)
